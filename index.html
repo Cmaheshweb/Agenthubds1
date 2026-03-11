@@ -2,36 +2,30 @@
 <html>
 
 <head>
-
 <title>AgentHubs</title>
 
 <style>
 
 body{
-margin:0;
 font-family:Arial;
-background:#0f0f0f;
+background:#111;
 color:white;
+margin:0;
 display:flex;
 height:100vh;
 }
 
 .sidebar{
-width:220px;
-background:#1b1b1b;
+width:200px;
+background:#1e1e1e;
 padding:20px;
 }
 
 .agent{
 padding:10px;
-background:#2a2a2a;
-margin:6px 0;
+background:#333;
+margin:5px 0;
 cursor:pointer;
-border-radius:5px;
-}
-
-.agent:hover{
-background:#3a3a3a;
 }
 
 .main{
@@ -42,29 +36,28 @@ flex-direction:column;
 
 .chat{
 flex:1;
-overflow:auto;
 padding:20px;
+overflow:auto;
 }
 
 .inputBox{
 display:flex;
+background:#1e1e1e;
 padding:10px;
-background:#1b1b1b;
 }
 
-.inputBox input{
+input{
 flex:1;
 padding:10px;
+background:#333;
 border:none;
-background:#2a2a2a;
 color:white;
 }
 
-.inputBox button{
+button{
 padding:10px;
 background:#4da6ff;
 border:none;
-cursor:pointer;
 }
 
 </style>
@@ -75,20 +68,11 @@ cursor:pointer;
 
 <div class="sidebar">
 
-<h2>AgentHubs</h2>
+<h3>AgentHubs</h3>
 
 <div class="agent" onclick="setAgent('startup')">Startup</div>
 <div class="agent" onclick="setAgent('study')">Study</div>
 <div class="agent" onclick="setAgent('content')">Content</div>
-<div class="agent" onclick="setAgent('marketing')">Marketing</div>
-<div class="agent" onclick="setAgent('research')">Research</div>
-<div class="agent" onclick="setAgent('photo')">Photo</div>
-<div class="agent" onclick="setAgent('image')">Image</div>
-
-<hr>
-
-<button onclick="mode='ai'">AI Mode</button>
-<button onclick="mode='search'">Search Mode</button>
 
 </div>
 
@@ -98,7 +82,7 @@ cursor:pointer;
 
 <div class="inputBox">
 
-<input id="input" placeholder="Ask anything">
+<input id="input" placeholder="Ask AI...">
 
 <button onclick="send()">Send</button>
 
@@ -109,7 +93,6 @@ cursor:pointer;
 <script>
 
 let currentAgent="startup"
-let mode="ai"
 
 function setAgent(agent){
 currentAgent=agent
@@ -117,37 +100,13 @@ currentAgent=agent
 
 async function send(){
 
-const input=document.getElementById("input").value
+let input=document.getElementById("input").value
 
-const chat=document.getElementById("chat")
+let chat=document.getElementById("chat")
 
 chat.innerHTML += "<p><b>You:</b> "+input+"</p>"
 
-if(mode==="ai"){
-
-if(currentAgent==="image"){
-
-const res=await fetch("/image",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-prompt:input
-})
-
-})
-
-const data=await res.json()
-
-chat.innerHTML += "<img src='"+data.image+"' width='300'>"
-
-}else{
-
-const res=await fetch("/chat",{
+const res = await fetch("/chat",{
 
 method:"POST",
 
@@ -157,45 +116,19 @@ headers:{
 
 body:JSON.stringify({
 message:input,
-agent:currentAgent,
-user:"user1"
+agent:currentAgent
 })
 
 })
 
-const data=await res.json()
+const data = await res.json()
 
 chat.innerHTML += "<p><b>AI:</b> "+data.reply+"</p>"
-
-}
-
-}
-
-if(mode==="search"){
-
-const res=await fetch("/search",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-query:input
-})
-
-})
-
-const data=await res.json()
-
-chat.innerHTML += "<p><b>Search:</b> "+data.answer+"</p>"
-
-}
 
 }
 
 </script>
 
 </body>
+
 </html>
