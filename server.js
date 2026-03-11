@@ -1,7 +1,8 @@
 import express from "express"
 import cors from "cors"
 import OpenAI from "openai"
-import axios from "axios"
+import path from "path"
+import { fileURLToPath } from "url"
 
 const app=express()
 
@@ -9,53 +10,31 @@ app.use(cors())
 app.use(express.json())
 
 const openai=new OpenAI({
-apiKey:"YOUR_OPENAI_API_KEY"
+apiKey:process.env.OPENAI_API_KEY
 })
-
-let requestCount={}
 
 const agents={
 
-startup:"Generate startup ideas with cost and steps",
+startup:"Generate startup ideas",
 
-study:"Explain study topics simply",
+study:"Explain study topics",
 
-content:"Generate social media content",
-
-marketing:"Generate marketing plans",
-
-research:"Provide research explanation",
-
-photo:"Give photo editing suggestions",
-
-image:"Generate image prompts"
+content:"Generate social media content"
 
 }
 
 app.post("/chat",async(req,res)=>{
 
-const {message,agent,user}=req.body
+const {message,agent}=req.body
 
-if(!requestCount[user]) requestCount[user]=0
-
-if(requestCount[user]>=10){
-
-return res.json({
-reply:"Daily limit reached"
-})
-
-}
-
-requestCount[user]++
-
-const systemPrompt=agents[agent] || "Helpful AI"
+const prompt=agents[agent] || "Helpful AI"
 
 const completion=await openai.chat.completions.create({
 
 model:"gpt-4.1-mini",
 
 messages:[
-{role:"system",content:systemPrompt},
+{role:"system",content:prompt},
 {role:"user",content:message}
 ]
 
@@ -67,62 +46,17 @@ reply:completion.choices[0].message.content
 
 })
 
-app.post("/image",async(req,res)=>{
+const __filename=fileURLToPath(import.meta.url)
+const __dirname=path.dirname(__filename)
 
-const {prompt}=req.body
+app.use(express.static(__dirname))
 
-const result=await openai.images.generate({
-
-model:"gpt-image-1",
-
-prompt:prompt,
-size:"1024x1024"
-
+app.get("/",(req,res)=>{
+res.sendFile(path.join(__dirname,"index.html"))
 })
 
-res.json({
-image:result.data[0].url
-})
+const PORT=process.env.PORT || 5000
 
-})
-
-app.post("/search",async(req,res)=>{
-
-const query=req.body.query
-
-const result=await axios.get("https://serpapi.com/search.json",{
-
-params:{
-q:query,
-api_key:"YOUR_SERPAPI_KEY"
-}
-
-})
-
-const snippets=result.data.organic_results
-.slice(0,3)
-.map(r=>r.snippet)
-.join("\n")
-
-const completion=await openai.chat.completions.create({
-
-model:"gpt-4.1-mini",
-
-messages:[
-{
-role:"user",
-content:`Answer using this info:\n${snippets}`
-}
-]
-
-})
-
-res.json({
-answer:completion.choices[0].message.content
-})
-
-})
-
-app.listen(5000,()=>{
-console.log("AgentHubs running")
+app.listen(PORT,()=>{
+console.log("Server running")
 })
