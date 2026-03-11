@@ -16,9 +16,10 @@ height:100vh;
 }
 
 .sidebar{
-width:200px;
+width:220px;
 background:#1e1e1e;
 padding:20px;
+overflow:auto;
 }
 
 .agent{
@@ -26,6 +27,10 @@ padding:10px;
 background:#333;
 margin:5px 0;
 cursor:pointer;
+}
+
+.agent:hover{
+background:#4da6ff;
 }
 
 .main{
@@ -58,6 +63,12 @@ button{
 padding:10px;
 background:#4da6ff;
 border:none;
+cursor:pointer;
+}
+
+img{
+margin-top:10px;
+border-radius:10px;
 }
 
 </style>
@@ -73,6 +84,19 @@ border:none;
 <div class="agent" onclick="setAgent('startup')">Startup</div>
 <div class="agent" onclick="setAgent('study')">Study</div>
 <div class="agent" onclick="setAgent('content')">Content</div>
+
+<h4>AI Tools</h4>
+
+<div class="agent" onclick="setAgent('image')">AI Image Generator</div>
+<div class="agent" onclick="setAgent('search')">AI Search Engine</div>
+
+<h4>Marketplace</h4>
+
+<div class="agent">SEO Agent</div>
+<div class="agent">YouTube Agent</div>
+<div class="agent">Startup Advisor</div>
+<div class="agent">Marketing Bot</div>
+<div class="agent">Coding Helper</div>
 
 </div>
 
@@ -105,6 +129,52 @@ let input=document.getElementById("input").value
 let chat=document.getElementById("chat")
 
 chat.innerHTML += "<p><b>You:</b> "+input+"</p>"
+
+if(currentAgent==="image"){
+
+const res = await fetch("/image",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+prompt:input
+})
+
+})
+
+const data = await res.json()
+
+chat.innerHTML += "<img src='"+data.image+"' width='300'>"
+
+return
+}
+
+if(currentAgent==="search"){
+
+const res = await fetch("/search",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+query:input
+})
+
+})
+
+const data = await res.json()
+
+chat.innerHTML += "<p><b>Search:</b> "+data.answer+"</p>"
+
+return
+}
 
 const res = await fetch("/chat",{
 
