@@ -4,155 +4,142 @@ import OpenAI from "openai"
 import path from "path"
 import { fileURLToPath } from "url"
 
-const app = express()
+const app=express()
 
 app.use(cors())
 app.use(express.json())
 
-const openai = new OpenAI({
-apiKey: process.env.OPENAI_API_KEY
+const openai=new OpenAI({
+apiKey:process.env.OPENAI_API_KEY
 })
 
-/* ---------- AGENTS ---------- */
+const agents={
 
-const agents = {
+startup:"Generate startup ideas with cost and steps",
 
-startup: "Generate startup ideas with cost and steps",
+study:"Explain study topics simply",
 
-study: "Explain study topics in very simple language",
+content:"Generate social media posts",
 
-content: "Generate social media posts and captions",
+seo:"You are an SEO expert",
 
-seo: "You are an SEO expert",
+youtube:"Give YouTube video ideas",
 
-youtube: "You help create YouTube video ideas",
+marketing:"Create marketing strategies",
 
-marketing: "You create marketing strategies",
-
-coding: "You help with programming"
+coding:"Help with coding problems"
 
 }
 
-/* ---------- CHAT AGENT ---------- */
-
-app.post("/chat", async (req, res) => {
+app.post("/chat",async(req,res)=>{
 
 try{
 
-const { message, agent } = req.body
+const {message,agent}=req.body
 
-const prompt = agents[agent] || "Helpful AI assistant"
+const prompt=agents[agent] || "Helpful AI"
 
-const completion = await openai.chat.completions.create({
+const completion=await openai.chat.completions.create({
 
-model: "gpt-4.1-mini",
+model:"gpt-4.1-mini",
 
-messages: [
-{ role: "system", content: prompt },
-{ role: "user", content: message }
+messages:[
+{role:"system",content:prompt},
+{role:"user",content:message}
 ]
 
 })
 
 res.json({
-reply: completion.choices[0].message.content
+reply:completion.choices[0].message.content
 })
 
 }catch(err){
 
 res.json({
-reply: "AI error"
+reply:"AI error"
 })
 
 }
 
 })
 
-/* ---------- IMAGE GENERATOR ---------- */
-
-app.post("/image", async (req, res) => {
+app.post("/image",async(req,res)=>{
 
 try{
 
-const { prompt } = req.body
+const {prompt}=req.body
 
-const result = await openai.images.generate({
+const result=await openai.images.generate({
 
-model: "gpt-image-1",
-
-prompt: prompt,
-size: "1024x1024"
+model:"gpt-image-1",
+prompt:prompt,
+size:"1024x1024"
 
 })
 
 res.json({
-image: result.data[0].url
+image:result.data[0].url
 })
 
 }catch(err){
 
 res.json({
-image: ""
+image:""
 })
 
 }
 
 })
 
-/* ---------- AI SEARCH ENGINE ---------- */
-
-app.post("/search", async (req, res) => {
+app.post("/search",async(req,res)=>{
 
 try{
 
-const { query } = req.body
+const {query}=req.body
 
-const completion = await openai.chat.completions.create({
+const completion=await openai.chat.completions.create({
 
-model: "gpt-4.1-mini",
+model:"gpt-4.1-mini",
 
-messages: [
+messages:[
 {
-role: "system",
-content: "You are a search engine. Give factual and clear answers."
+role:"system",
+content:"You are a search engine. Give factual answers."
 },
 {
-role: "user",
-content: query
+role:"user",
+content:query
 }
 ]
 
 })
 
 res.json({
-answer: completion.choices[0].message.content
+answer:completion.choices[0].message.content
 })
 
 }catch(err){
 
 res.json({
-answer: "Search failed"
+answer:"Search failed"
 })
 
 }
 
 })
 
-/* ---------- STATIC FILE ---------- */
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename=fileURLToPath(import.meta.url)
+const __dirname=path.dirname(__filename)
 
 app.use(express.static(__dirname))
 
-app.get("/", (req, res) => {
-res.sendFile(path.join(__dirname, "index.html"))
+app.get("/",(req,res)=>{
+res.sendFile(path.join(__dirname,"index.html"))
 })
 
-/* ---------- SERVER ---------- */
+const PORT=process.env.PORT || 5000
 
-const PORT = process.env.PORT || 5000
-
-app.listen(PORT, () => {
-console.log("AgentHubs Server Running")
+app.listen(PORT,()=>{
+console.log("AgentHubs running")
 })
