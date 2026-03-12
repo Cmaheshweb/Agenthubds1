@@ -123,28 +123,35 @@ currentAgent=agent
 
 async function send(){
 
-let input=document.getElementById("input").value
+let input=document.getElementById("input").value.trim()
+
+if(!input) return
+
 let chat=document.getElementById("chat")
 
 chat.innerHTML += "<p><b>You:</b> "+input+"</p>"
 
+document.getElementById("input").value=""
+
+try{
+
 if(currentAgent==="image"){
 
 const res=await fetch("/image",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({prompt:input})
-
 })
 
 const data=await res.json()
 
+if(data.image){
 chat.innerHTML += "<img src='"+data.image+"' width='300'>"
+}else{
+chat.innerHTML += "<p>Image generation failed</p>"
+}
 
 return
 }
@@ -152,15 +159,11 @@ return
 if(currentAgent==="search"){
 
 const res=await fetch("/search",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({query:input})
-
 })
 
 const data=await res.json()
@@ -171,23 +174,28 @@ return
 }
 
 const res=await fetch("/chat",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
 message:input,
 agent:currentAgent
 })
-
 })
 
 const data=await res.json()
 
 chat.innerHTML += "<p><b>AI:</b> "+data.reply+"</p>"
+
+}catch(err){
+
+chat.innerHTML += "<p>Server error. Try again.</p>"
+console.log(err)
+
+}
+
+chat.scrollTop = chat.scrollHeight
 
 }
 
