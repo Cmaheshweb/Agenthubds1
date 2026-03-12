@@ -9,8 +9,14 @@ const app=express()
 app.use(cors())
 app.use(express.json())
 
-const openai=new OpenAI({
-apiKey:process.env.OPENAI_API_KEY
+app.get("/key",(req,res)=>{
+
+if(process.env.OPENAI_API_KEY){
+res.send("API KEY FOUND")
+}else{
+res.send("API KEY MISSING")
+}
+
 })
 
 const agents={
