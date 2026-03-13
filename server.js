@@ -1,32 +1,24 @@
 import express from "express"
 import cors from "cors"
-import OpenAI from "openai"
 import path from "path"
 import { fileURLToPath } from "url"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
 const app=express()
 
 app.use(cors())
 app.use(express.json())
 
-app.get("/key",(req,res)=>{
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-if(process.env.OPENAI_API_KEY){
-res.send("API KEY FOUND")
-}else{
-res.send("API KEY MISSING")
-}
-
+const model = genAI.getGenerativeModel({
+model:"gemini-1.5-flash"
 })
 
 const agents={
-
-startup:"Give startup ideas",
-
+startup:"Give startup idea",
 study:"Explain study topic simply",
-
-content:"Create social media post"
-
+content:"Create social media caption"
 }
 
 app.post("/chat",async(req,res)=>{
@@ -35,23 +27,14 @@ try{
 
 const {message,agent}=req.body
 
-console.log("Message:",message)
+const prompt=(agents[agent] || "Helpful assistant") + "\n\nUser: "+message
 
-const prompt=agents[agent] || "Helpful assistant"
+const result = await model.generateContent(prompt)
 
-const completion=await openai.chat.completions.create({
-
-model:"gpt-4o-mini",
-
-messages:[
-{role:"system",content:prompt},
-{role:"user",content:message}
-]
-
-})
+const text = result.response.text()
 
 res.json({
-reply:completion.choices[0].message.content
+reply:text
 })
 
 }catch(err){
@@ -75,8 +58,8 @@ app.get("/",(req,res)=>{
 res.sendFile(path.join(__dirname,"index.html"))
 })
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`AgentHubs running on port ${PORT}`);
-});
+app.listen(PORT,"0.0.0.0",()=>{
+console.log("AgentHubs running")
+})
