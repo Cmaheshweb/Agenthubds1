@@ -1,61 +1,131 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <title>AgentHubs</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+body{
+font-family:Arial;
+background:#111;
+color:white;
+margin:0;
+display:flex;
+height:100vh;
+}
+
+.sidebar{
+width:220px;
+background:#1e1e1e;
+padding:15px;
+}
+
+.agent{
+padding:10px;
+background:#333;
+margin:5px 0;
+cursor:pointer;
+}
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+.chat{
+flex:1;
+padding:20px;
+overflow:auto;
+}
+
+.inputBox{
+display:flex;
+background:#1e1e1e;
+padding:10px;
+}
+
+input{
+flex:1;
+padding:10px;
+background:#333;
+border:none;
+color:white;
+}
+
+button{
+padding:10px;
+background:#4da6ff;
+border:none;
+cursor:pointer;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="container">
-
 <div class="sidebar">
+<h3>AgentHubs</h3>
 
-<h2>AgentHubs</h2>
-
-<h3>AI Agents</h3>
-
-<button onclick="setAgent('startup')">Startup Agent</button>
-<button onclick="setAgent('study')">Study Agent</button>
-<button onclick="setAgent('content')">Content Agent</button>
-<button onclick="setAgent('coding')">Coding Agent</button>
-<button onclick="setAgent('marketing')">Marketing Agent</button>
-
-<h3>AI Tools</h3>
-
-<button onclick="setAgent('image')">Image Generator</button>
-<button onclick="setAgent('search')">AI Search</button>
-<button onclick="setAgent('business')">Business Planner</button>
-<button onclick="setAgent('code')">Code Generator</button>
-
-<h3>Marketplace</h3>
-
-<div class="card">SEO Agent</div>
-<div class="card">YouTube Script Agent</div>
-<div class="card">Trading Strategy Agent</div>
-
+<div class="agent" onclick="setAgent('startup')">Startup</div>
+<div class="agent" onclick="setAgent('study')">Study</div>
+<div class="agent" onclick="setAgent('content')">Content</div>
 </div>
 
-<div class="chat">
+<div class="main">
 
-<div id="messages"></div>
+<div id="chat" class="chat"></div>
 
-<div class="input">
-
-<input id="input" placeholder="Ask anything..." />
-
+<div class="inputBox">
+<input id="input" placeholder="Ask AI...">
 <button onclick="send()">Send</button>
-
-<button onclick="startVoice()">🎤</button>
-
 </div>
 
 </div>
 
-</div>
+<script>
 
-<script src="app.js"></script>
-<script src="voice.js"></script>
+let currentAgent="startup"
+
+function setAgent(agent){
+currentAgent=agent
+}
+
+async function send(){
+
+let input=document.getElementById("input").value
+let chat=document.getElementById("chat")
+
+chat.innerHTML += "<p><b>You:</b> "+input+"</p>"
+
+try{
+
+const res = await fetch(window.location.origin + "/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:input,
+agent:currentAgent
+})
+})
+
+const data = await res.json()
+
+chat.innerHTML += "<p><b>AI:</b> "+data.reply+"</p>"
+
+}catch(err){
+
+chat.innerHTML += "<p style='color:red'>ERROR</p>"
+console.log(err)
+
+}
+
+}
+
+</script>
 
 </body>
 </html>
